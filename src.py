@@ -63,7 +63,7 @@ def sortearJogadores(modoDeJogo):
     print('.')
     time.sleep(0.3)
     
-    print('---------------------------------------------')
+    print('---------------------------------------------\n')
     
     if modoDeJogo == 1:
         jogador2 = 'Jogador 2'
@@ -75,11 +75,11 @@ def sortearJogadores(modoDeJogo):
     
     input('\nAperte ⏎ Enter para começar.')
 
-def main():
+def menu():
     limparTerminal()
     print('---------------------------------------------')
     print('----------------BATALHA NAVAL----------------')
-    print('---------------------------------------------')
+    print('---------------------------------------------\n')
     print('Escolha uma das opções: \n1. Jogar contra amigos\n2. Jogar contra a máquina\n3. Regras')
 
     # Validação de entrada para menu
@@ -103,6 +103,25 @@ def main():
         case _:
             limparTerminal()
             print('regras')
+
+def main():
+    while True:
+        menu()
+        print('\n\n---------------------------------------------')
+        print('-----------------FIM DE JOGO-----------------')
+        print('---------------------------------------------\n')
+        print('Quer jogar novamente? Responda apenas "sim" ou "não"')
+        entrada = input('R: ')
+        confirmacao = entrada.lower().strip()
+
+        if confirmacao == 'sim':
+            continue
+        elif confirmacao == 'não' or confirmacao == 'nao':
+            break
+        
+        else:
+            print('\nResposta não esperada.')
+            entrada = input('R: ')
 
 main()
 
@@ -129,7 +148,7 @@ tabuleiros = [
 # limparTerminal()
 print('---------------------------------------------')
 print('------------------TABULEIRO------------------')
-print('---------------------------------------------')
+print('---------------------------------------------\n')
 print(
     '\n  A   B     C    D    E    F    G    H\n'
     '_______________________________________\n'
