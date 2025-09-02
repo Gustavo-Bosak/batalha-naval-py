@@ -45,6 +45,8 @@ import random
 import time
 import os
 
+tabuleiros = []
+
 # Função para limpar o terminal (variação para Windows e macOS)
 def limparTerminal():
     if os.name == 'nt':
@@ -74,6 +76,21 @@ def sortearJogadores(modoDeJogo):
     print(f'Quem joga primeiro é o {primeiroAJogar}!')
     
     input('\nAperte ⏎ Enter para começar.')
+    exibirTabuleiro(0)
+
+def exibirTabuleiro(idTab):
+    limparTerminal()
+    print(' A   B    C    D    E    F    G    H')
+    print('_______________________________________')
+    for i in range(8):
+            linha_formatada = ''
+            for j in range(8):
+                linha_formatada += tabuleiros[idTab][i][j] + ' | '
+            print(linha_formatada + f'{i+1}')
+    print('_______________________________________\n')
+
+def posicionarBarcos(posicao):
+    limparTerminal()
 
 def menu():
     limparTerminal()
@@ -106,6 +123,16 @@ def menu():
 
 def main():
     while True:
+        # Resetar tabuleiro
+        for i in range(0,2):
+            tabuleiros[i] = []
+            
+            for _ in range(8):
+                novaLinha = []
+                for _ in range(8):
+                    novaLinha.append('🌊')
+                tabuleiros[i].append(novaLinha)
+            
         menu()
         print('\n\n---------------------------------------------')
         print('-----------------FIM DE JOGO-----------------')
@@ -116,53 +143,15 @@ def main():
 
         if confirmacao == 'sim':
             continue
+
         elif confirmacao == 'não' or confirmacao == 'nao':
             break
-        
+
         else:
             print('\nResposta não esperada.')
             entrada = input('R: ')
 
 main()
-
-tabuleiros = [
-    [
-        ['A1', 'B1', 'C1', 'D1', 'E1', 'F1',],
-        ['A2', 'B2', 'C2', 'D2', 'E2', 'F2',],
-        ['A3', 'B3', 'C3', 'D3', 'E3', 'F3',],
-        ['A4', 'B4', 'C4', 'D4', 'E4', 'F4',],
-        ['A5', 'B5', 'C5', 'D5', 'E5', 'F5',],
-        ['A6', 'B6', 'C6', 'D6', 'E6', 'F6'] 
-    ],
-    [
-        ['A1', 'B1', 'C1', 'D1', 'E1', 'F1',],
-        ['A2', 'B2', 'C2', 'D2', 'E2', 'F2',],
-        ['A3', 'B3', 'C3', 'D3', 'E3', 'F3',],
-        ['A4', 'B4', 'C4', 'D4', 'E4', 'F4',],
-        ['A5', 'B5', 'C5', 'D5', 'E5', 'F5',],
-        ['A6', 'B6', 'C6', 'D6', 'E6', 'F6'] 
-    ],
-]
-
-
-# limparTerminal()
-print('---------------------------------------------')
-print('------------------TABULEIRO------------------')
-print('---------------------------------------------\n')
-print(
-    '\n  A   B     C    D    E    F    G    H\n'
-    '_______________________________________\n'
-    '🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 1\n'
-    '🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 2\n'
-    '🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 3\n'
-    '🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 4\n'
-    '🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 5\n'
-    '🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 6\n'
-    '🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 7\n'
-    '🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 8\n'
-    '_______________________________________\n'
-)
-
 
 '''
 matriz = [
