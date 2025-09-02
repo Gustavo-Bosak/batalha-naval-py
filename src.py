@@ -45,7 +45,16 @@ import random
 import time
 import os
 
+# Definição inicial e global dos tabuleiros
 tabuleiros = []
+for i in range(0,2):
+    tabuleiro = []
+    for _ in range(8):
+        novaLinha = []
+        for _ in range(8):
+            novaLinha.append('🌊')
+        tabuleiro.append(novaLinha)
+    tabuleiros.append(tabuleiro)
 
 # Função para limpar o terminal (variação para Windows e macOS)
 def limparTerminal():
@@ -76,16 +85,22 @@ def sortearJogadores(modoDeJogo):
     print(f'Quem joga primeiro é o {primeiroAJogar}!')
     
     input('\nAperte ⏎ Enter para começar.')
-    exibirTabuleiro(0)
 
-def exibirTabuleiro(idTab):
     limparTerminal()
+    exibirTabuleiro(0, primeiroAJogar)
+
+def exibirTabuleiro(numeroTabuleiro, jogadorDaVez):
+    limparTerminal()
+    print('---------------------------------------------')
+    print(f'------------------{jogadorDaVez.upper()}------------------')
+    print('---------------------------------------------\n')
+
     print(' A   B    C    D    E    F    G    H')
     print('_______________________________________')
     for i in range(8):
             linha_formatada = ''
             for j in range(8):
-                linha_formatada += tabuleiros[idTab][i][j] + ' | '
+                linha_formatada += tabuleiros[numeroTabuleiro][i][j] + ' | '
             print(linha_formatada + f'{i+1}')
     print('_______________________________________\n')
 
@@ -115,6 +130,7 @@ def menu():
     match resposta:
         case 1:
             sortearJogadores(resposta)
+
         case 2:
             sortearJogadores(resposta)
         case _:
@@ -126,7 +142,7 @@ def main():
         # Resetar tabuleiro
         for i in range(0,2):
             tabuleiros[i] = []
-            
+
             for _ in range(8):
                 novaLinha = []
                 for _ in range(8):
