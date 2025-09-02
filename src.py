@@ -42,58 +42,69 @@
 '''
 
 import random
+import time
 import os
 
+# Função para limpar o terminal (variação para Windows e macOS)
 def limparTerminal():
     if os.name == 'nt':
         os.system('cls')
     else :
         os.system('clear')
 
-limparTerminal()
-print('---------------------------------------------')
-print('----------------BATALHA NAVAL----------------')
-print('---------------------------------------------')
-print('Escolha uma das opções: \n1. Jogar contra amigos\n2. Jogar contra a máquina\n3. Regras')
+def sortearJogadores(modoDeJogo):
+    limparTerminal()
+    print(f'Sorteando os jogadores', end='')
+    time.sleep(0.3)
+    print('.', end='')
+    time.sleep(0.3)
+    print('.', end='')
+    time.sleep(0.3)
+    print('.')
+    time.sleep(0.3)
+    
+    print('---------------------------------------------')
+    
+    if modoDeJogo == 1:
+        jogador2 = 'Jogador 2'
+    elif modoDeJogo == 2:
+        jogador2 = 'Computador'
 
-while True:
-    try:
-        resposta = int(input('\nR: '))
+    primeiroAJogar = random.choice(['Jogador 1', jogador2])
+    print(f'Quem joga primeiro é o {primeiroAJogar}!')
+    
+    input('\nAperte ⏎ Enter para começar.')
 
-        if resposta >= 1 and resposta <= 3:
-            break
-        else:
-            print('Digite apenas números entre 1 e 3.')
-            
-    except ValueError:
-        print('Digite apenas números inteiros')
+def main():
+    limparTerminal()
+    print('---------------------------------------------')
+    print('----------------BATALHA NAVAL----------------')
+    print('---------------------------------------------')
+    print('Escolha uma das opções: \n1. Jogar contra amigos\n2. Jogar contra a máquina\n3. Regras')
 
+    # Validação de entrada para menu
+    while True:
+        try:
+            resposta = int(input('\nR: '))
 
-print('---------------------------------------------')
-print('Sorteando os jogadores')
-print('---------------------------------------------')
+            if resposta >= 1 and resposta <= 3:
+                break
+            else:
+                print('Digite apenas números entre 1 e 3.')
+                
+        except ValueError:
+            print('Digite apenas números inteiros')
+    
+    match resposta:
+        case 1:
+            sortearJogadores(resposta)
+        case 2:
+            sortearJogadores(resposta)
+        case _:
+            limparTerminal()
+            print('regras')
 
-sorteado = ''
-print(f'Jogador {sorteado} é o primeiro a jogar.')
-input('R: ')
-
-limparTerminal()
-print('---------------------------------------------')
-print('------------------TABULEIRO------------------')
-print('---------------------------------------------')
-print(
-    '\n  A   B     C    D    E    F    G    H\n'
-    '_______________________________________\n'
-    '🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 1\n'
-    '🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 2\n'
-    '🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 3\n'
-    '🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 4\n'
-    '🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 5\n'
-    '🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 6\n'
-    '🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 7\n'
-    '🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 8\n'
-    '_______________________________________\n'
-)
+main()
 
 tabuleiros = [
     [
@@ -115,6 +126,23 @@ tabuleiros = [
 ]
 
 
+# limparTerminal()
+print('---------------------------------------------')
+print('------------------TABULEIRO------------------')
+print('---------------------------------------------')
+print(
+    '\n  A   B     C    D    E    F    G    H\n'
+    '_______________________________________\n'
+    '🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 1\n'
+    '🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 2\n'
+    '🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 3\n'
+    '🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 4\n'
+    '🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 5\n'
+    '🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 6\n'
+    '🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 7\n'
+    '🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 🌊 | 8\n'
+    '_______________________________________\n'
+)
 
 
 '''
