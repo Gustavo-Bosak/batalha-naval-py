@@ -8,10 +8,11 @@
 2. Função para posicionar barcos:
     - exibir tabuleiro vazio
     - capturar posição e tamanho do barco com base em coordenadas (exemplo A2 e B2)
-    - posicionar na lista os barcos
-    - verificar se todos os barcos foram posicionados, e então passar a vez
+    - posicionar na lista os barcos, trocando o emoji de onda pelo emoji de barco
+    - verificar se todos os barcos foram posicionados, e então passar a vez através da função alternar jogadores
     - validar se não há sobreposição
     - validar se a posição existe no tabuleiro
+    - validar se não atingiu o limite de barcos (1 de 4 casas, 2 de cada 3, 2 e 1 casa)
 
 3. Função para sortear jogador:
     - gerar número aleatório para cada jogador e calcular qual é o maior, para decidir quem joga primeiro
@@ -22,22 +23,24 @@
 5. Função para capturar jogada:
     - verificar qual jogador está jogando
     - capturar posição da bomba
-    - retornar se acertou ou não
     - validar se a posição existe no tabuleiro
+    - registrar jogada na lista, trocando o emoji de onda pelo emoji de bomba respectivo ao erro ou acerto
+    - retornar se acertou ou não
 
-6. Função para atualizar o tabuleiro
+6. Função para exibir o tabuleiro
     - imprimir o tabuleiro atualizado do respectivo jogador
-    - chamar a função capturar jogada
 
 7. Função para verificar vitória:
     - verificar se todos os barcos foram destruidos
     - imprimir condição de vitória
 
 8. Função principal
+    - rodar em loop com condição de querer continuar jogando ou não
+    - resetar tabuleiros e  chamar função menu dentro do loop
 
 9. Função para modo vs computador:
-    - chamar posicionar barcos
-    - 
+    - gerar um valor aleatório para ser usado no posicionamento de barcos
+    - checar lista de acertos e erros para se basear na escolha do valor aleatório, priorizando valores próximos ao acerto
 
 '''
 
