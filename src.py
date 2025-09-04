@@ -50,14 +50,22 @@ import os
 
 # Definição inicial e global dos tabuleiros
 tabuleiros = []
-for i in range(0,2):
-    tabuleiro = []
-    for _ in range(8):
-        novaLinha = []
+jogadas_certas = []
+jogadas_erradas = []
+
+def criarTabuleiros(tabuleiros):
+    for i in range(0,2):
+        if len(tabuleiros) >= 1:
+            tabuleiros[i] = []
+        else:
+            tabuleiro = []
+
         for _ in range(8):
-            novaLinha.append('🌊')
-        tabuleiro.append(novaLinha)
-    tabuleiros.append(tabuleiro)
+            novaLinha = []
+            for _ in range(8):
+                novaLinha.append('🌊')
+            tabuleiro.append(novaLinha)
+        tabuleiros.append(tabuleiro)
 
 # Função para limpar o terminal (variação para Windows e macOS)
 def limparTerminal():
@@ -92,62 +100,70 @@ def sortearJogadores(modoDeJogo):
     limparTerminal()
     exibirTabuleiro(0, primeiroAJogar)
     
-    
 #função para alterar jogadores
-def alternarJogador(jogadorAtual):      #Verifica se o jogador atual é 0 (Jogador 1), se sim retorna 1 (Jogador 2), se não retorna 0 (Jogador 1)
+def alternarJogador(jogadorAtual):
+    #Verifica se o jogador atual é 0 (Jogador 1), se sim retorna 1 (Jogador 2), se não retorna 0 (Jogador 1)
     if jogadorAtual == 0:
         return 1
     else: 
-        return 0                     
+        return 0   
     
 #função para capturar jogada  
-def capturarJogada(jogadorAtual):       #recebe o jogador atual (0 ou 1) como parâmetro
-    inimigo = 1 - jogadorAtual          
-
-    # Dicionário mapeando as letras das colunas para os índices
-    colunas = {'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4, 'F': 5, 'G': 6, 'H': 7}
+def capturarJogada(jogadorAtual):      #recebe o jogador atual (0 ou 1) como parâmetro
+    inimigo = 1 - jogadorAtual
 
     while True:
         entrada = input(f"🎯 Jogador {jogadorAtual + 1}, escolha uma posição para atacar (ex: B4): ").strip().upper()
+        return validarJogada(entrada, inimigo) # True or False
+        
+def validarJogada(coordenadas, inimigo):
+    # Dicionário mapeando as letras das colunas para os índices
+    colunas = {'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4, 'F': 5, 'G': 6, 'H': 7}
 
+    if (type(coordenadas) == str):
         # Valida o formato da entrada (letra + número)
-        if len(entrada) < 2 or len(entrada) > 3:
+        if len(coordenadas) < 2 or len(coordenadas) > 3:
             print("❌ Formato inválido. Tente novamente.")
-            continue
+            return True
 
-        letra = entrada[0]      #Pega a primeira letra da entrada
-        numero = entrada[1:]    #Pega o número 
+        letra = coordenadas[0]      #Pega a primeira letra da entrada
+        numero = coordenadas[1:]    #Pega o número 
 
         # Verifica se a letra está contida no dicionário
         if letra not in colunas:
             print("❌ Letra inválida. Tente novamente.")
-            continue
+            return True
 
         # Verifica se a posição existe no tabuleiro
         if not numero.isdigit() or int(numero) < 1 or int(numero) > 8:
             print("❌ Número da linha inválido. Tente novamente.")
-            continue
+            return True
 
         linha = int(numero) - 1      # Subtrai 1 para ajustar o índice(0 a 7)
         coluna = colunas[letra]      # Usando o dicionário para pegar o índice da coluna
 
-        # Verifica se a posição foi atacada antes (com base nos símbolos)
-        simboloAtual = tabuleiros[inimigo][linha][coluna]
+    # Verifica se a posição foi atacada antes (com base nos símbolos)
+    simboloAtual = tabuleiros[inimigo][linha][coluna]    
 
-        if simboloAtual in ['🔥', '💣']:
-            print("⛔ Você já jogou nessa posição. Escolha outra.")
-            continue
+    if simboloAtual in ['🔥', '💣']:
+        print("⛔ Você já jogou nessa posição. Escolha outra.")
+        return True
 
-        # Verifica se acertou o barco ou errou
-        if simboloAtual == '🚢':
-            tabuleiros[inimigo][linha][coluna] = '🔥'
-            print("🔥 ACERTOU!")
-            return True
-        else:
-            tabuleiros[inimigo][linha][coluna] = '💣'
-            print("💣 ERROU!")
-            return False
 
+    # Verifica se acertou o barco ou errou
+    if simboloAtual == '🚢':
+        tabuleiros[inimigo][linha][coluna] = '🔥'
+        if maquina:
+            jogadas_certas.append((linha, coluna))
+        # quantBarcos[inimigo] -= 1
+        print("🔥 ACERTOU!")
+        return True
+    
+    else:
+        tabuleiros[inimigo][linha][coluna] = '💣'
+        jogadas_erradas.append((linha, coluna))
+        print("💣 ERROU!")
+        return False
 
 #função para exibir tabuleiro
 def exibirTabuleiro(numeroTabuleiro, jogadorDaVez):
@@ -158,15 +174,30 @@ def exibirTabuleiro(numeroTabuleiro, jogadorDaVez):
 
     print(' A   B    C    D    E    F    G    H')
     print('_______________________________________')
+
     for i in range(8):
             linha_formatada = ''
             for j in range(8):
-                linha_formatada += tabuleiros[numeroTabuleiro][i][j] + ' | '
+                linha_formatada += ('🚢' if tabuleiros[numeroTabuleiro][i][j] == '🌊' else '🌊') + ' | '
             print(linha_formatada + f'{i+1}')
     print('_______________________________________\n')
 
+
+# Funções pra fazer
 def posicionarBarcos(posicao):
     limparTerminal()
+
+def posicionarBarcosMaquina(posicao):
+    return ''
+
+def validarPosicao():
+    return ''
+
+def verificarVitoria():
+    # while quantidadeBarcosP1 >= 1 or quantidadeBarcosP2:
+    #     ainda não ganhram
+    
+    return 'B'
 
 def menu():
     limparTerminal()
@@ -191,6 +222,7 @@ def menu():
     match resposta:
         case 1:
             sortearJogadores(resposta)
+            verificarVitoria()
 
         case 2:
             sortearJogadores(resposta)
@@ -202,6 +234,7 @@ def menu():
 #FERRETE
 def tiroAleatorio():
     """Gera coordenadas de um tiro aleatório no tabuleiro."""
+    
     linha = random.randint(0, 7)
     coluna = random.randint(0, 7)
     return (linha, coluna)
@@ -249,25 +282,15 @@ def maquina(jogadas_certas, jogadas_erradas):
         tiro = tiroAleatorio()
         while tiro in jogadas_certas or tiro in jogadas_erradas:
             tiro = tiroAleatorio()
-            
+                
     return tiro
 
 def alternarJogador():
     """Alterna o turno entre os jogadores."""
     # Sua lógica para alternar jogadores viria aqui
-
+'''
 def validaJogada(coordenadas, tabuleiro):
-    """
-    Valida a jogada em um tabuleiro e retorna o resultado.
-    
-    Args:
-        coordenadas (tuple): As coordenadas (linha, coluna) do tiro.
-        tabuleiro (list): O tabuleiro a ser verificado.
-        
-    Returns:
-        str: O resultado do tiro ("Acertou", "Errou" ou "Barco Destruído").
-    """
-    # Exemplo de lógica simples de validação
+
     linha, coluna = coordenadas
     if tabuleiro[linha][coluna] == '⛵': # Supondo que '⛵' representa um barco
         return "Acertou"
@@ -276,17 +299,12 @@ def validaJogada(coordenadas, tabuleiro):
     else:
         return "Errou" # Ou outra validação, se o espaço já foi atingido
 
+''' 
+
 def main():
     while True:
         # Resetar tabuleiro
-        for i in range(0,2):
-            tabuleiros[i] = []
-
-            for _ in range(8):
-                novaLinha = []
-                for _ in range(8):
-                    novaLinha.append('🌊')
-                tabuleiros[i].append(novaLinha)
+        criarTabuleiros(tabuleiros)
             
         menu()
         print('\n\n---------------------------------------------')
@@ -311,38 +329,40 @@ def main():
 
 main()
 
-'''
-matriz = [
-    [0, 0 , 0],
-    [0, 0 , 0],
-    [1, 0 , 2],
-    [3, 0 , 4],
-]
+# tiroAleatorio
+# validacao
+#     trocaJogador
+#     JogaDnv
+#     VERIFICAR
 
-linhasNulas = 0
-colunasNulas = 0
+# menu (
+#     sortearJogadores
+#     verificarVitoria(
+#         while barcosRestantes > 0:
+#             if acertou
+#             capturarJogada
+#             validarJogada
+#             else:
+#             alternarJogador
+#             continue
+            
+#         'Ganhou'
+#     )
+# )
 
-for i in range(4):
-    itemNuloLinha = 0
-    itemNuloColuna = 0
+# posicaoMaquina = tiroAleatorio():
+#             (ultima_jogada[0] - 1, ultima_jogada[1]), # Acima
+#             (ultima_jogada[0] + 1, ultima_jogada[1]), # Abaixo
+#             (ultima_jogada[0], ultima_jogada[1] - 1), # Esquerda
+#             (ultima_jogada[0], ultima_jogada[1] + 1) 
+# posicionarBarcosMaquina
+# posicionarBarcosJogador
+#     validar 
+# posicionarBarcos(posicaoMaquina)
+# posicionarBarcos(posicao)(
+#     validarPosição
+#     validarTamanho
+#     tabuleiro = posicao 'O' = 'B'
+#     quantBarcos =+ 1
+# )
 
-    for j in range(3):
-        if matriz[i][j] == 0:
-            itemNuloLinha += 1
-
-    if itemNuloLinha == 3:
-        linhasNulas+= 1
-
-for i in range(3):
-    itemNuloLinha = 0
-    itemNuloColuna = 0
-    for j in range(4):
-        
-        if matriz[j][i] == 0:
-            itemNuloColuna += 1
-    
-    if itemNuloColuna == 4:
-        colunasNulas+= 1
-
-print(f'Número de linhas nulas: {linhasNulas} | Número de colunas nulas: {colunasNulas}')
-'''
