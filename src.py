@@ -198,6 +198,84 @@ def menu():
             limparTerminal()
             print('regras')
 
+
+#FERRETE
+def tiroAleatorio():
+    """Gera coordenadas de um tiro aleatório no tabuleiro."""
+    linha = random.randint(0, 7)
+    coluna = random.randint(0, 7)
+    return (linha, coluna)
+
+def maquina(jogadas_certas, jogadas_erradas):
+    """
+    Decide onde a máquina deve atirar com base nas jogadas anteriores.
+    
+    Args:
+        tabuleiro_adversario (list): O tabuleiro do jogador a ser atacado.
+        jogadas_certas (list): Lista de coordenadas onde a máquina acertou.
+        jogadas_erradas (list): Lista de coordenadas onde a máquina errou.
+        
+    Returns:
+        tuple: As coordenadas (linha, coluna) do tiro.
+    """
+    tiro = None
+    # Lógica de 'caçar' o barco: se houver acertos anteriores não afundados
+    if jogadas_certas:
+        # Pega a última jogada certa para tentar atirar ao redor
+        ultima_jogada = jogadas_certas[-1]
+        opcoes_de_tiro = [
+            (ultima_jogada[0] - 1, ultima_jogada[1]), # Acima
+            (ultima_jogada[0] + 1, ultima_jogada[1]), # Abaixo
+            (ultima_jogada[0], ultima_jogada[1] - 1), # Esquerda
+            (ultima_jogada[0], ultima_jogada[1] + 1)  # Direita
+        ]
+        
+        # Filtra as opções para garantir que estão dentro do tabuleiro e ainda não foram tentadas
+        tiros_validos = [
+            op for op in opcoes_de_tiro 
+            if 0 <= op[0] <= 7 and 0 <= op[1] <= 7 and op not in jogadas_certas and op not in jogadas_erradas
+        ]
+
+        '''
+        for op in opcoes_de_tiro:
+            if 0 <= op[0] <= 7 and 0 <= op[1] <= 7 and op not in jogadas_certas and op not in jogadas_erradas:
+                tiros_validos.append(op)
+        '''
+        if tiros_validos:
+            tiro = random.choice(tiros_validos)
+    
+    # Se não houver acertos ou se a lógica de 'caça' não encontrar um tiro válido
+    if not tiro:
+        tiro = tiroAleatorio()
+        while tiro in jogadas_certas or tiro in jogadas_erradas:
+            tiro = tiroAleatorio()
+            
+    return tiro
+
+def alternarJogador():
+    """Alterna o turno entre os jogadores."""
+    # Sua lógica para alternar jogadores viria aqui
+
+def validaJogada(coordenadas, tabuleiro):
+    """
+    Valida a jogada em um tabuleiro e retorna o resultado.
+    
+    Args:
+        coordenadas (tuple): As coordenadas (linha, coluna) do tiro.
+        tabuleiro (list): O tabuleiro a ser verificado.
+        
+    Returns:
+        str: O resultado do tiro ("Acertou", "Errou" ou "Barco Destruído").
+    """
+    # Exemplo de lógica simples de validação
+    linha, coluna = coordenadas
+    if tabuleiro[linha][coluna] == '⛵': # Supondo que '⛵' representa um barco
+        return "Acertou"
+    elif tabuleiro[linha][coluna] == '🌊': # Supondo que '🌊' representa a água
+        return "Errou"
+    else:
+        return "Errou" # Ou outra validação, se o espaço já foi atingido
+
 def main():
     while True:
         # Resetar tabuleiro
@@ -227,6 +305,9 @@ def main():
         else:
             print('\nResposta não esperada.')
             entrada = input('R: ')
+
+
+
 
 main()
 
