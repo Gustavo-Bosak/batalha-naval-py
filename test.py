@@ -58,12 +58,12 @@ def criarNovosTabuleiros(tabuleiros, quantTotalBarcos, jogadas_certas, jogadas_e
     # Redefinição da quantidade inicial de barcos
     quantTotalBarcos[0] = 1
     quantTotalBarcos[1] = 1
-    jogadas_certas = []
-    jogadas_erradas = []
+    jogadas_certas.clear()
+    jogadas_erradas.clear()
 
     for _ in range(0,2):
         if len(tabuleiros) == 2:
-            tabuleiros = []
+            tabuleiros.clear()
         
         tabuleiro = []
 
@@ -442,41 +442,3 @@ def main():
             entrada = input('R: ')
 
 main()
-
-# tiroAleatorio
-# validacao
-#     trocaJogador
-#     JogaDnv
-#     VERIFICAR
-
-# menu (
-#     sortearJogadores
-#     exibirVitoria(
-#         while barcosRestantes > 0:
-#             if acertou
-#             capturarJogada
-#             validarJogada
-#             else:
-#             alternarJogador
-#             continue
-            
-#         'Ganhou'
-#     )
-# )
-
-# posicaoMaquina = tiroAleatorio():
-#             (ultima_jogada[0] - 1, ultima_jogada[1]), # Acima
-#             (ultima_jogada[0] + 1, ultima_jogada[1]), # Abaixo
-#             (ultima_jogada[0], ultima_jogada[1] - 1), # Esquerda
-#             (ultima_jogada[0], ultima_jogada[1] + 1) 
-# posicionarBarcosMaquina
-# posicionarBarcosJogador
-#     validar 
-# posicionarBarcos(posicaoMaquina)
-# posicionarBarcos(posicao)(
-#     validarPosição
-#     validarTamanho
-#     tabuleiro = posicao 'O' = 'B'
-#     quantBarcos =+ 1
-# )
-

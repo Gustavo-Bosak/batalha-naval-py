@@ -58,12 +58,12 @@ def criarNovosTabuleiros(tabuleiros, quantTotalBarcos, jogadas_certas, jogadas_e
     # Redefinição da quantidade inicial de barcos
     quantTotalBarcos[0] = 1
     quantTotalBarcos[1] = 1
-    jogadas_certas = []
-    jogadas_erradas = []
+    jogadas_certas.clear()
+    jogadas_erradas.clear()
 
     for _ in range(0,2):
         if len(tabuleiros) == 2:
-            tabuleiros = []
+            tabuleiros.clear()
         
         tabuleiro = []
 
