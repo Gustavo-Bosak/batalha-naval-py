@@ -480,3 +480,139 @@ main()
 #     quantBarcos =+ 1
 # )
 
+'''
+barcos_restantes_template = {    
+    4: 1,  # 1 barco de 4 posições   
+    3: 2,  # 2 barcos de 3 posições
+    2: 2,  # 2 barcos de 2 posições
+    1: 1   # 1 barco de 1 
+}
+
+def coordenada_para_indices(coordenada):
+    letras = {'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4, 'F': 5, 'G': 6, 'H': 7}  # Mapeamento das letras para índices
+    letra = coordenada[0].upper()
+    numero = coordenada[1:]
+    if letra in letras and numero.isdigit():
+        linha = int(numero) - 1
+        coluna = letras[letra]
+        if 0 <= linha <= 7 and 0 <= coluna <= 7:
+            return linha, coluna
+    return None
+
+
+
+def validarPosicao(tabuleiro, coord1, coord2, barcos_restantes):
+    linha1, col1 = coord1
+    linha2, col2 = coord2
+
+    if linha1 == linha2: 
+        tamanho = abs(col2 - col1) + 1                                  # checa se é horizontal fazendo a diferença entre as colunas
+    else:
+        tamanho = abs(linha2 - linha1) + 1                              # checa se é vertical fazendo a diferença entre as linhas
+        return False, "❌ O barco deve estar em linha reta (horizontal ou vertical).", None
+
+    tamanho = abs(linha2 - linha1 + col2 - col1) + 1                    # tamanho do barco (considerando linha ou coluna) e +1 para incluir a casa inicial abs para garantir valor positivo
+
+    if tamanho not in barcos_restantes or barcos_restantes[tamanho] == 0:       # checa se o tamanho é válido e se ainda há barcos desse tamanho disponíveis
+        return False, f"❌ Você não pode posicionar mais barcos de {tamanho} casas.", None
+
+    # Verifica sobreposição
+    if linha1 == linha2:  # horizontal
+        for col in range(min(col1, col2), max(col1, col2)+1):   # percorre as colunas entre col1 e col2 e verifica se já há um barco
+            if tabuleiro[linha1][col] != '🌊':                  # Se o emoji for diferente de mar, retorna falso
+                return False, "🚫 Já existe um barco nessa posição.", None
+    else:  # vertical
+        for lin in range(min(linha1, linha2), max(linha1, linha2)+1):       
+            if tabuleiro[lin][col1] != '🌊':
+                return False, "🚫 Já existe um barco nessa posição.", None
+
+    return True, "✅ Posição válida.", tamanho
+
+
+def posicionarBarcos(jogador):                                                    # jogador = 0 ou 1
+    while sum(barcos_por_jogador[jogador].values()) > 0:                          # enquanto a soma dos valores do dicionário for maior que 0, ou seja, enquanto houver barcos para posicionar
+        exibirTabuleiro(jogador, f"Jogador {jogador + 1}")                        # exibe o tabuleiro do jogador atual
+        print("📦 Barcos restantes:")                                             # exibe os barcos restantes
+        for tamanho, qtd in barcos_por_jogador[jogador].items():                  # percorre o dicionário de barcos restantes
+            if qtd > 0:
+                print(f" - {qtd} barco(s) de {tamanho} casas")                    # exibe a quantidade de barcos de cada tamanho
+
+        entrada = input("Digite a posição inicial e final do barco (ex: A1 A4): ").strip().upper()         # captura a entrada do jogador e formata
+        try:
+            inicio, fim = entrada.split()                                       # tenta separar a entrada em duas partes
+        except ValueError:                                                      # se não conseguir, exibe mensagem de erro e continua o loop
+            print("❌ Entrada inválida. Use o formato: A1 A4.")                 
+            continue
+
+        coord1 = coordenada_para_indices(inicio)                         # converte as coordenadas para índices
+        coord2 = coordenada_para_indices(fim)                       
+
+        if not coord1 or not coord2:                                     # se alguma das coordenadas for inválida, exibe mensagem de erro e continua o loop
+            print("❌ Coordenadas inválidas.") 
+            continue
+
+        valido, msg, tamanho = validarPosicao(tabuleiros[jogador], coord1, coord2, barcos_por_jogador[jogador])     # valida a posição
+        if not valido:      
+            print(msg)
+            continue
+
+        # ✅ Posiciona o barco
+        linha1, col1 = coord1               # desempacota as coordenadas
+        linha2, col2 = coord2               # desempacota as coordenadas
+
+        if linha1 == linha2: 
+            for col in range(min(col1, col2), max(col1, col2)+1):   # percorre as colunas entre col1 e col2 e posiciona o barco
+                tabuleiros[jogador][linha1][col] = '🚢'             # posiciona o barco no tabuleiro
+        else:
+            for lin in range(min(linha1, linha2), max(linha1, linha2)+1):
+                tabuleiros[jogador][lin][col1] = '🚢'
+
+        barcos_por_jogador[jogador][tamanho] -= 1                   # decrementa a quantidade de barcos restantes do tamanho usado
+
+    print(f"\n✅ Jogador {jogador + 1}, todos os barcos foram posicionados!\n")
+    input("Aperte ⏎ para continuar.")
+    limparTerminal()
+
+
+#nao tenho ideia do que é isso
+def posicionarBarcosMaquina(jogador):
+    while sum(barcos_por_jogador[jogador].values()) > 0:
+        tamanho_aleatorio = random.choice([t for t, q in barcos_por_jogador[jogador].items() if q > 0])
+
+        orientacao = random.choice(['H', 'V'])
+        linha = random.randint(0, 7)
+        coluna = random.randint(0, 7)
+
+        if orientacao == 'H':
+            if coluna + tamanho_aleatorio > 8:
+                continue
+            coord1 = (linha, coluna)
+            coord2 = (linha, coluna + tamanho_aleatorio - 1)
+        else:
+            if linha + tamanho_aleatorio > 8:
+                continue
+            coord1 = (linha, coluna)
+            coord2 = (linha + tamanho_aleatorio - 1, coluna)
+
+        valido, msg, tamanho = validarPosicao(tabuleiros[jogador], coord1, coord2, barcos_por_jogador[jogador])
+        if not valido:
+            continue
+
+        # Posiciona
+        linha1, col1 = coord1
+        linha2, col2 = coord2
+
+        if linha1 == linha2:
+            for col in range(col1, col2 + 1):
+                tabuleiros[jogador][linha1][col] = '🚢'
+        else:
+            for lin in range(linha1, linha2 + 1):
+                tabuleiros[jogador][lin][col1] = '🚢'
+
+        barcos_por_jogador[jogador][tamanho] -= 1
+        
+        
+        global barcos_por_jogador
+barcos_por_jogador = [barcos_restantes_template.copy(), barcos_restantes_template.copy()]
+'''
+
