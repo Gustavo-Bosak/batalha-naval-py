@@ -91,7 +91,66 @@ def sortearJogadores(modoDeJogo):
 
     limparTerminal()
     exibirTabuleiro(0, primeiroAJogar)
+    
+    
+#função para alterar jogadores
+def alternarJogador(jogadorAtual):      #Verifica se o jogador atual é 0 (Jogador 1), se sim retorna 1 (Jogador 2), se não retorna 0 (Jogador 1)
+    if jogadorAtual == 0:
+        return 1
+    else: 0                     
+    
+#função para capturar jogada  
+def capturarJogada(jogadorAtual):       #recebe o jogador atual (0 ou 1) como parâmetro
+    if jogadorAtual == 0:               #verifica se o jogador atual é 0 (Jogador 1), se sim o inimigo é 1 (Jogador 2)
+        inimigo = 1
+    else: 0
 
+    # Dicionário mapeando as letras das colunas para os índices
+    colunas = {'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4, 'F': 5, 'G': 6, 'H': 7}
+
+    while True:
+        entrada = input(f"🎯 Jogador {jogadorAtual + 1}, escolha uma posição para atacar (ex: B4): ").strip().upper()
+
+        # Valida o formato da entrada (letra + número)
+        if len(entrada) < 2 or len(entrada) > 3:
+            print("❌ Formato inválido. Tente novamente.")
+            continue
+
+        letra = entrada[0]      #Pega a primeira letra da entrada
+        numero = entrada[1:]    #Pega o número 
+
+        # Verifica se a letra está contida no dicionário
+        if letra not in colunas:
+            print("❌ Letra inválida. Tente novamente.")
+            continue
+
+        # Verifica se a posição existe no tabuleiro
+        if not numero.isdigit() or int(numero) < 1 or int(numero) > 8:
+            print("❌ Número da linha inválido. Tente novamente.")
+            continue
+
+        linha = int(numero) - 1      # Subtrai 1 para ajustar o índice(0 a 7)
+        coluna = colunas[letra]      # Usando o dicionário para pegar o índice da coluna
+
+        # Verifica se a posição foi atacada antes (com base nos símbolos)
+        simboloAtual = tabuleiros[inimigo][linha][coluna]
+
+        if simboloAtual in ['🔥', '💣']:
+            print("⛔ Você já jogou nessa posição. Escolha outra.")
+            continue
+
+        # Verifica se acertou o barco ou errou
+        if simboloAtual == '🚢':
+            tabuleiros[inimigo][linha][coluna] = '🔥'
+            print("🔥 ACERTOU!")
+            return True
+        else:
+            tabuleiros[inimigo][linha][coluna] = '💣'
+            print("💣 ERROU!")
+            return False
+
+
+#função para exibir tabuleiro
 def exibirTabuleiro(numeroTabuleiro, jogadorDaVez):
     limparTerminal()
     print('---------------------------------------------')
