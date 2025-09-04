@@ -48,20 +48,18 @@ import random
 import time
 import os
 
-# Definição inicial e global dos tabuleiros
+# Inicialização das listas
 tabuleiros = []
-
-# Definição global das jogadas certas e erradas da máquina
 jogadas_certas = []
 jogadas_erradas = []
-
-# Definição global da quantidade inicial de barcos
 quantTotalBarcos = [7, 7] # 1 barco de 4x1, 2 barcos para cada tamanho 3x1, 2x1 e 1x1, totalizando 7
 
-def criarNovosTabuleiros(tabuleiros, quantTotalBarcos):
+def criarNovosTabuleiros(tabuleiros, quantTotalBarcos, jogadas_certas, jogadas_erradas):
     # Redefinição da quantidade inicial de barcos
-    quantTotalBarcos[0] = 2
-    quantTotalBarcos[1] = 2
+    quantTotalBarcos[0] = 1
+    quantTotalBarcos[1] = 1
+    jogadas_certas = []
+    jogadas_erradas = []
 
     for _ in range(0,2):
         if len(tabuleiros) == 2:
@@ -111,15 +109,120 @@ def sortearJogadores(modoDeJogo):
     else:
         return 1
 
+#função para exibir tabuleiro
+def exibirTabuleiro(jogadorAtual):    
+    limparTerminal()
+    print('---------------------------------------------')
+    print(f'--------------TABULEIRO INIMIGO-------------')
+    print('---------------------------------------------\n')
+
+    print(' A   B    C    D    E    F    G    H')
+    print('_______________________________________')
+
+    for i in range(8):
+            linha_formatada = ''
+            for j in range(8):
+                simbolo = tabuleiros[jogadorAtual][i][j]
+                if simbolo in ['🔥', '💣']:
+                    linha_formatada += simbolo + ' | '
+                else:
+                    linha_formatada += '🌊' + ' | '
+            print(linha_formatada + f'{i+1}')
+    print('_______________________________________\n')
+
 #função para alterar jogadores
 def alternarJogador(jogadorAtual):
-    #Verifica se o jogador atual é 0 (Jogador 1), se sim retorna 1 (Jogador 2), se não retorna 0 (Jogador 1)
-    if jogadorAtual == 0:
-        return 1
-    else: 
-        return 0
+    return 1 - jogadorAtual
+
+def capturarEntrada(jogadorAtual, modoDeJogo):
+    if modoDeJogo == 2 and jogadorAtual == 1:
+        # Passa direto, resposta já capturada da máquina
+        return maquina(jogadas_certas, jogadas_erradas)
+    
+    else:
+        entrada = input(f"🎯 Jogador {jogadorAtual + 1}, escolha uma posição (ex: B4): ").strip().upper()
+        return entrada
+
+def validarEntrada(entrada):
+    colunas = {'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4, 'F': 5, 'G': 6, 'H': 7}
+    
+    if isinstance(entrada, tuple):
+        return entrada
+    
+    if len(entrada) < 2 or len(entrada) > 3:
+        return None
+    
+    letra, numero = entrada[0], entrada[1:]
+    
+    if letra not in colunas or not numero.isdigit():
+        return None
+    
+    linha = int(numero) - 1
+    coluna = colunas[letra]
+
+    if 0 <= linha <= 7 and 0 <= coluna <= 7:
+        return (linha, coluna)
+    else:
+        return None
+
+def processarJogada(jogadorAtual, coordenadas, modoDeJogo):
+    inimigo = 1 - jogadorAtual
+    linha, coluna = coordenadas
+    simbolo = tabuleiros[inimigo][linha][coluna]
+
+    if simbolo in ['🔥', '💣']:
+        print("⛔ Já jogou aqui.")
+        input("Aperte ⏎ Enter  para continuar...")
+        return 'repetida'
+
+    if simbolo == '🚢':
+        tabuleiros[inimigo][linha][coluna] = '🔥'
+        quantTotalBarcos[inimigo] -= 1
+
+        if modoDeJogo == 2 and jogadorAtual == 1:
+            print("🤖 O computador jogou e ACERTOU!")
+            jogadas_certas.append(coordenadas)
+        else:
+            print("🔥 ACERTOU!")
+        return 'acerto' if quantTotalBarcos[inimigo] > 0 else 'vitoria'
+    else:
+        tabuleiros[inimigo][linha][coluna] = '💣'
+        if modoDeJogo == 2 and jogadorAtual == 1:
+            print("🤖 O computador jogou e ERROU!")
+            jogadas_erradas.append(coordenadas)
+
+        else:
+            print("💣 ERROU!")
+        input("\nAperte ⏎ Enter  para continuar...")
+        return 'erro'
+
+def turno(jogadorAtual, modoDeJogo):
+    while True:
+        if not (modoDeJogo == 2 and jogadorAtual == 1):
+            exibirTabuleiro(1 - jogadorAtual)
+        else:
+            limparTerminal()
+
+        entrada = capturarEntrada(jogadorAtual, modoDeJogo)
+        coordenadas = validarEntrada(entrada)
+        if coordenadas is None:
+            print("❌ Entrada inválida.")
+            input("\nAperte ⏎ Enter  para continuar...")
+            continue
+
+        resultado = processarJogada(jogadorAtual, coordenadas, modoDeJogo)
+        if resultado == 'repetida':
+            continue
         
-#função para capturar jogada  
+        if resultado == 'vitoria':
+            return 'vitoria'
+        
+        if resultado == 'erro':
+            return 'erro'
+
+
+''' comentado para testes
+#função para capturar jogada
 def capturarJogada(jogadorAtual):      #recebe o jogador atual (0 ou 1) como parâmetro
     inimigo = 1 - jogadorAtual
     exibirTabuleiro(inimigo)
@@ -129,7 +232,6 @@ def capturarJogada(jogadorAtual):      #recebe o jogador atual (0 ou 1) como par
         entrada = input(f"🎯 Jogador {jogadorAtual + 1}, escolha uma posição para atacar (ex: B4): ").strip().upper()
         if validarJogada(entrada, inimigo) == False: # True or False
             return
-
     
 def validarJogada(coordenadas, inimigo):
     # Dicionário mapeando as letras das colunas para os índices
@@ -178,27 +280,7 @@ def validarJogada(coordenadas, inimigo):
         tabuleiros[inimigo][linha][coluna] = '💣'
         print("💣 ERROU!")
         return False
-
-#função para exibir tabuleiro
-def exibirTabuleiro(jogadorAtual):    
-    limparTerminal()
-    print('---------------------------------------------')
-    print(f'--------------TABULEIRO INIMIGO-------------')
-    print('---------------------------------------------\n')
-
-    print(' A   B    C    D    E    F    G    H')
-    print('_______________________________________')
-
-    for i in range(8):
-            linha_formatada = ''
-            for j in range(8):
-                simbolo = tabuleiros[jogadorAtual][i][j]
-                if simbolo in ['🔥', '💣']:
-                    linha_formatada += simbolo + ' | '
-                else:
-                    linha_formatada += '🌊' + ' | '
-            print(linha_formatada + f'{i+1}')
-    print('_______________________________________\n')
+'''
 
 # Funções pra fazer
 def posicionarBarcos(jogadorAtual):
@@ -210,6 +292,7 @@ def posicionarBarcosMaquina():
 def validarPosicao():
     print('A')
 
+'''
 def exibirVitoria(jogadorAtual, resposta):
     # Roda o jogo até alguém ganhar
     while quantTotalBarcos[0] > 0 or quantTotalBarcos[1] > 0:
@@ -227,6 +310,28 @@ def exibirVitoria(jogadorAtual, resposta):
         print(f'Jogador 1 ganhou! 🎉')
     else:
         print(f'{jogador2} ganhou! 🎉')
+'''
+
+def verificarVitoria(modoDeJogo):
+    jogadorAtual = sortearJogadores(modoDeJogo)
+
+    while True:
+        status = turno(jogadorAtual, modoDeJogo)
+
+        if status == 'vitoria':
+            if modoDeJogo == 1:
+                jogador2 = 'Jogador 2'
+            else:
+                jogador2 = 'Computador'
+                
+            # Imprime a mensagem de vitória conforme adversário
+            if quantTotalBarcos[1] == 0 :
+                print(f'Jogador 1 ganhou! 🎉')
+            else:
+                print(f'{jogador2} ganhou! 🎉')
+            break
+        jogadorAtual = alternarJogador(jogadorAtual)
+    
 
 def menu():
     limparTerminal()
@@ -252,26 +357,15 @@ def menu():
     
     match resposta:
         case 1:
-            jogadorAtual = sortearJogadores(resposta)
-            for _ in range(2):
-                posicionarBarcos(jogadorAtual)
-                jogadorAtual = alternarJogador(jogadorAtual)
-            
-            exibirVitoria(jogadorAtual, resposta)
+            verificarVitoria(resposta)
 
         case 2:
-            jogadorAtual = sortearJogadores(resposta)
-            for _ in range(2):
-                posicionarBarcos(jogadorAtual)
-                jogadorAtual = alternarJogador(jogadorAtual)
-            
-            exibirVitoria(jogadorAtual, resposta)
+            verificarVitoria(resposta)
+
         case _:
             limparTerminal()
             print('regras')
 
-
-#FERRETE
 def tiroAleatorio():
     """Gera coordenadas de um tiro aleatório no tabuleiro."""
     linha = random.randint(0, 7)
@@ -327,8 +421,8 @@ def maquina(jogadas_certas, jogadas_erradas):
 def main():
     while True:
         # Resetar tabuleiro
-        criarNovosTabuleiros(tabuleiros, quantTotalBarcos)
-            
+        criarNovosTabuleiros(tabuleiros, quantTotalBarcos, jogadas_certas, jogadas_erradas)
+
         menu()
         print('\n\n---------------------------------------------')
         print('-----------------FIM DE JOGO-----------------')
