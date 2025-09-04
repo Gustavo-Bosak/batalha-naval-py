@@ -97,13 +97,12 @@ def sortearJogadores(modoDeJogo):
 def alternarJogador(jogadorAtual):      #Verifica se o jogador atual é 0 (Jogador 1), se sim retorna 1 (Jogador 2), se não retorna 0 (Jogador 1)
     if jogadorAtual == 0:
         return 1
-    else: 0                     
+    else: 
+        return 0                     
     
 #função para capturar jogada  
 def capturarJogada(jogadorAtual):       #recebe o jogador atual (0 ou 1) como parâmetro
-    if jogadorAtual == 0:               #verifica se o jogador atual é 0 (Jogador 1), se sim o inimigo é 1 (Jogador 2)
-        inimigo = 1
-    else: 0
+    inimigo = 1 - jogadorAtual          
 
     # Dicionário mapeando as letras das colunas para os índices
     colunas = {'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4, 'F': 5, 'G': 6, 'H': 7}
