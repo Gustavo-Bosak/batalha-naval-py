@@ -60,7 +60,8 @@ quantTotalBarcos = [7, 7] # 1 barco de 4x1, 2 barcos para cada tamanho 3x1, 2x1 
 
 def criarNovosTabuleiros(tabuleiros, quantTotalBarcos):
     # Redefinição da quantidade inicial de barcos
-    quantTotalBarcos = [1,1]
+    quantTotalBarcos[0] = 2
+    quantTotalBarcos[1] = 2
 
     for _ in range(0,2):
         if len(tabuleiros) == 2:
@@ -120,14 +121,14 @@ def alternarJogador(jogadorAtual):
         
 #função para capturar jogada  
 def capturarJogada(jogadorAtual):      #recebe o jogador atual (0 ou 1) como parâmetro
-    exibirTabuleiro(jogadorAtual)
     inimigo = 1 - jogadorAtual
+    exibirTabuleiro(inimigo)
 
     # bug: não ta saindo do laço quando acerta e quando a lista de barcos é esvaziada, não é erro mas precisa ajustar
     while True:
         entrada = input(f"🎯 Jogador {jogadorAtual + 1}, escolha uma posição para atacar (ex: B4): ").strip().upper()
         if validarJogada(entrada, inimigo) == False: # True or False
-            break
+            return
 
     
 def validarJogada(coordenadas, inimigo):
@@ -166,6 +167,9 @@ def validarJogada(coordenadas, inimigo):
     # Verifica se acertou o barco ou errou
     if simboloAtual == '🚢':
         tabuleiros[inimigo][linha][coluna] = '🔥'
+        if quantTotalBarcos[inimigo] < 1:
+            return False
+        
         quantTotalBarcos[inimigo] -= 1 # bug: não faço ideia kkkk
         print("🔥 ACERTOU!\n")
         return True
@@ -176,7 +180,6 @@ def validarJogada(coordenadas, inimigo):
         return False
 
 #função para exibir tabuleiro
-# bug: por algum motivo não ta exibindo quando é foguinho nem bomba
 def exibirTabuleiro(jogadorAtual):    
     limparTerminal()
     print('---------------------------------------------')
@@ -189,7 +192,11 @@ def exibirTabuleiro(jogadorAtual):
     for i in range(8):
             linha_formatada = ''
             for j in range(8):
-                linha_formatada += ('🌊' if tabuleiros[jogadorAtual][i][j] == '🚢' else '🌊') + ' | '
+                simbolo = tabuleiros[jogadorAtual][i][j]
+                if simbolo in ['🔥', '💣']:
+                    linha_formatada += simbolo + ' | '
+                else:
+                    linha_formatada += '🌊' + ' | '
             print(linha_formatada + f'{i+1}')
     print('_______________________________________\n')
 
@@ -203,14 +210,12 @@ def posicionarBarcosMaquina():
 def validarPosicao():
     print('A')
 
-def verificarVitoria(jogadorAtual, resposta):
+def exibirVitoria(jogadorAtual, resposta):
     # Roda o jogo até alguém ganhar
     while quantTotalBarcos[0] > 0 or quantTotalBarcos[1] > 0:
         capturarJogada(jogadorAtual)
         input('\nAperte ⏎ Enter para começar.')
-        
         jogadorAtual = alternarJogador(jogadorAtual)
-        print(jogadorAtual)
 
     if resposta == 1:
         jogador2 = 'Jogador 2'
@@ -252,7 +257,7 @@ def menu():
                 posicionarBarcos(jogadorAtual)
                 jogadorAtual = alternarJogador(jogadorAtual)
             
-            verificarVitoria(jogadorAtual, resposta)
+            exibirVitoria(jogadorAtual, resposta)
 
         case 2:
             jogadorAtual = sortearJogadores(resposta)
@@ -260,7 +265,7 @@ def menu():
                 posicionarBarcos(jogadorAtual)
                 jogadorAtual = alternarJogador(jogadorAtual)
             
-            verificarVitoria(jogadorAtual, resposta)
+            exibirVitoria(jogadorAtual, resposta)
         case _:
             limparTerminal()
             print('regras')
@@ -352,7 +357,7 @@ main()
 
 # menu (
 #     sortearJogadores
-#     verificarVitoria(
+#     exibirVitoria(
 #         while barcosRestantes > 0:
 #             if acertou
 #             capturarJogada
