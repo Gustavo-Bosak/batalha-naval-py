@@ -287,9 +287,9 @@ def exibirVitoria(jogadorAtual, modoDeJogo):
         
     # Imprime a mensagem de vitória conforme adversário
     if quantBarcosTotais[1 - jogadorAtual] == 0:
-        print(f'Jogador 1 ganhou! 🎉')
-    else:
         print(f'{jogador2} ganhou! 🎉')
+    else:
+        print(f'Jogador 1 ganhou! 🎉')
 
 def validarPosicao(tabuleiro, coord1, coord2, barcos_restantes):
     linha1, col1 = coord1
@@ -399,7 +399,7 @@ def posicionarBarcosMaquina(jogador, barcos_por_jogador):
 
         barcos_por_jogador[jogador][tamanho] -= 1
 
-def tiroAleatorio():
+def tiroAleatorio():  
     """Gera coordenadas de um tiro aleatório no tabuleiro."""
     linha = random.randint(0, 7)
     coluna = random.randint(0, 7)
