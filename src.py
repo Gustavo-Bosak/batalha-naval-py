@@ -291,22 +291,22 @@ def exibirVitoria(jogadorAtual, modoDeJogo):
     else:
         print(f'Jogador 1 ganhou! 🎉')
 
-def validarPosicao(tabuleiro, coord1, coord2, barcos_restantes):
-    linha1, col1 = coord1
-    linha2, col2 = coord2
+def validarPosicao(tabuleiro, coord1, coord2, barcos_restantes):                                          
+    linha1, col1 = coord1                                                                                  
+    linha2, col2 = coord2                                                                                #converte as coordenadas para índices A3 vira (0,2)
 
     if linha1 != linha2 and col1 != col2:
         return False, "❌ O barco deve estar em linha reta (horizontal ou vertical).", None
     
-    tamanho = abs(linha2 - linha1 + col2 - col1) + 1                    # tamanho do barco (considerando linha ou coluna) e +1 para incluir a casa inicial abs para garantir valor positivo
+    tamanho = abs(linha2 - linha1 + col2 - col1) + 1                                                      # +1 para incluir a casa inicial abs para garantir valor positivo
 
-    if tamanho not in barcos_restantes or barcos_restantes[tamanho] == 0:       # checa se o tamanho é válido e se ainda há barcos desse tamanho disponíveis
+    if tamanho not in barcos_restantes or barcos_restantes[tamanho] == 0:                                 
         return False, f"❌ Você não pode posicionar mais barcos de {tamanho} casas.", None
 
     # Verifica sobreposição
     if linha1 == linha2:  # horizontal
-        for col in range(min(col1, col2), max(col1, col2)+1):   # percorre as colunas entre col1 e col2 e verifica se já há um barco
-            if tabuleiro[linha1][col] != '🌊':                  # Se o emoji for diferente de mar, retorna falso
+        for col in range(min(col1, col2), max(col1, col2)+1):                                            
+            if tabuleiro[linha1][col] != '🌊':                  
                 return False, "🚫 Já existe um barco nessa posição.", None
     else:  # Horizontal
         for lin in range(min(linha1, linha2), max(linha1, linha2)+1):       
@@ -316,26 +316,26 @@ def validarPosicao(tabuleiro, coord1, coord2, barcos_restantes):
     return True, "✅ Posição válida.", tamanho
 
 def posicionarBarcos(jogador, barcos_por_jogador):                                                    # jogador = 0 ou 1
-    while sum(barcos_por_jogador[jogador].values()) > 0:                          # enquanto a soma dos valores do dicionário for maior que 0, ou seja, enquanto houver barcos para posicionar
-        exibirTabuleiro(jogador, False)                        # exibe o tabuleiro do jogador atual
+    while sum(barcos_por_jogador[jogador].values()) > 0:                                              # enquanto a soma dos valores do dicionário for maior que 0, ou seja, enquanto houver barcos para posicionar
+        exibirTabuleiro(jogador, False)                                                               
         print(f'\n Jogador {jogador+1} coloque seus barcos no tabuleiro!')
-        print("📦 Barcos restantes:")                                             # exibe os barcos restantes
-        for tamanho, qtd in barcos_por_jogador[jogador].items():                  # percorre o dicionário de barcos restantes
-            if qtd > 0:
-                print(f" - {qtd} barco(s) de {tamanho} casas")                    # exibe a quantidade de barcos de cada tamanho
+        print("📦 Barcos restantes:")                                                         
+        for tamanho, qtd in barcos_por_jogador[jogador].items():                                       # percorre o dicionário de barcos restantes
+            if qtd > 0:              
+                print(f" - {qtd} barco(s) de {tamanho} casas")                               
 
-        entrada = input("Digite a posição inicial e final do barco (ex: A1 A4): ").strip().upper()         # captura a entrada do jogador e formata
+        entrada = input("Digite a posição inicial e final do barco (ex: A1 A4): ").strip().upper()    # captura a entrada do jogador e formata
         try:
-            inicio, fim = entrada.split()                                       # tenta separar a entrada em duas partes
-        except ValueError:                                                      # se não conseguir, exibe mensagem de erro e continua o loop
+            inicio, fim = entrada.split()                                                             
+        except ValueError:                                                                            
             print("❌ Entrada inválida. Use o formato: A1 A4.")                 
             input('\nAperte ⏎ Enter para continuar.')
             continue 
 
-        coord1 = validarEntrada(inicio)                         # converte as coordenadas para índices
+        coord1 = validarEntrada(inicio)                                        
         coord2 = validarEntrada(fim)                       
 
-        if not coord1 or not coord2:                                     # se alguma das coordenadas for inválida, exibe mensagem de erro e continua o loop
+        if not coord1 or not coord2:                                        
             print("❌ Coordenadas inválidas.")
             input('\nAperte ⏎ Enter para continuar.')
             continue
@@ -347,17 +347,17 @@ def posicionarBarcos(jogador, barcos_por_jogador):                              
             continue
 
         # ✅ Posiciona o barco
-        linha1, col1 = coord1               # desempacota as coordenadas
-        linha2, col2 = coord2               # desempacota as coordenadas
+        linha1, col1 = coord1               
+        linha2, col2 = coord2              
 
         if linha1 == linha2: 
-            for col in range(min(col1, col2), max(col1, col2)+1):   # percorre as colunas entre col1 e col2 e posiciona o barco
-                tabuleiros[jogador][linha1][col] = '🚢'             # posiciona o barco no tabuleiro
+            for col in range(min(col1, col2), max(col1, col2)+1):   
+                tabuleiros[jogador][linha1][col] = '🚢'                                                   # posiciona o barco no tabuleiro
         else:
             for lin in range(min(linha1, linha2), max(linha1, linha2)+1):
                 tabuleiros[jogador][lin][col1] = '🚢'
 
-        barcos_por_jogador[jogador][tamanho] -= 1                   # decrementa a quantidade de barcos restantes do tamanho usado
+        barcos_por_jogador[jogador][tamanho] -= 1                                                         # subtrai a quantidade de barcos restantes do tamanho usado
 
     print(f"\n✅ Jogador {jogador + 1}, todos os barcos foram posicionados!\n")
     input("Aperte ⏎ para continuar.")
@@ -365,7 +365,7 @@ def posicionarBarcos(jogador, barcos_por_jogador):                              
 
 def posicionarBarcosMaquina(jogador, barcos_por_jogador):
     while sum(barcos_por_jogador[jogador].values()) > 0:
-        tamanho_aleatorio = random.choice([t for t, q in barcos_por_jogador[jogador].items() if q > 0])
+        tamanho_aleatorio = random.choice([t for t, q in barcos_por_jogador[jogador].items() if q > 0])                # escolhe um tamanho de barco aleatório que ainda tenha quantidade disponível
 
         orientacao = random.choice(['H', 'V'])
         linha, coluna = tiroAleatorio()
@@ -374,13 +374,12 @@ def posicionarBarcosMaquina(jogador, barcos_por_jogador):
             if coluna + tamanho_aleatorio > 8:
                 continue
             coord1 = (linha, coluna)
-            coord2 = (linha, coluna + tamanho_aleatorio - 1)
+            coord2 = (linha, coluna + tamanho_aleatorio - 1)                                                          # calcula a segunda coordenada com base no tamanho do barco faznedo -1 para incluir a casa inicial 
         else:
             if linha + tamanho_aleatorio > 8:
                 continue
             coord1 = (linha, coluna)
-            coord2 = (linha + tamanho_aleatorio - 1, coluna)
-
+            coord2 = (linha + tamanho_aleatorio - 1, coluna)                                               
         valido, msg, tamanho = validarPosicao(tabuleiros[jogador], coord1, coord2, barcos_por_jogador[jogador])
         
         if not valido:
@@ -444,17 +443,17 @@ def maquina(jogadas_certas, jogadas_erradas):
 def jogar(modoDeJogo):
     jogadorAtual = sortearJogadores(modoDeJogo)
 
-    if modoDeJogo == 2:
+    if modoDeJogo == 2:                                                                      # modoDeJogo = 1 (vs amigo) ou 2 (vs máquina)
         for _ in range(2):
-            if jogadorAtual == 1:
+            if jogadorAtual == 1:                                                             # se for a vez da máquina, posiciona os barcos automaticamente
                 posicionarBarcosMaquina(jogadorAtual, barcos_por_jogador)
             else:
                 posicionarBarcos(jogadorAtual, barcos_por_jogador)
 
-            jogadorAtual = alternarJogador(jogadorAtual)
+            jogadorAtual = alternarJogador(jogadorAtual)                                      
     
     else:
-        for _ in range(2):
+        for _ in range(2):                                                                 #se nao for modo de jogo 2, roda o modo 1
             posicionarBarcos(jogadorAtual, barcos_por_jogador)
             jogadorAtual = alternarJogador(jogadorAtual)
 
@@ -495,7 +494,7 @@ def menu():
 def main():
     while True:
         # Resetar tabuleiro
-        criarNovosTabuleiros(tabuleiros, jogadas_certas, jogadas_erradas, barcos_por_jogador)
+        criarNovosTabuleiros(tabuleiros, jogadas_certas, jogadas_erradas, barcos_por_jogador)                         #todas as funções tem clear entao reseta automaticamente
 
         menu()
         print('\n\n---------------------------------------------')
