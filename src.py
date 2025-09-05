@@ -117,13 +117,18 @@ def criarNovosTabuleiros(tabuleiros, jogadas_certas, jogadas_erradas, barcos_por
         tabuleiros.append(tabuleiro)
         barcos_por_jogador.append(barco_por_jogador)
 
-
 # Função para limpar o terminal (variação para Windows e macOS)
 def limparTerminal():
     if os.name == 'nt':
         os.system('cls')
     else :
         os.system('clear')
+
+def definirNomeJogador(modoDeJogo):
+    if modoDeJogo == 1:
+        return 'Jogador 2'
+    elif modoDeJogo == 2:
+        return 'Computador'
 
 # Função para definir o primeiro a jogar, retorna 0 ou 1
 def sortearJogadores(modoDeJogo):
@@ -138,10 +143,7 @@ def sortearJogadores(modoDeJogo):
     time.sleep(0.3)
     print('---------------------------------------------\n')
     
-    if modoDeJogo == 1:
-        jogador2 = 'Jogador 2'
-    elif modoDeJogo == 2:
-        jogador2 = 'Computador'
+    jogador2 = definirNomeJogador(modoDeJogo)
 
     primeiroAJogar = random.choice(['Jogador 1', jogador2])
     print(f'Quem joga primeiro é o {primeiroAJogar}!')
@@ -278,10 +280,7 @@ def alternarTurno(jogadorAtual, modoDeJogo):
 
 def exibirVitoria(status, jogadorAtual, modoDeJogo):
     if status == 'vitoria':
-        if modoDeJogo == 1:
-            jogador2 = 'Jogador 2'
-        else:
-            jogador2 = 'Computador'
+        jogador2 = definirNomeJogador(modoDeJogo)
             
         # Imprime a mensagem de vitória conforme adversário
         if quantBarcosTotais[1 - jogadorAtual] == 0:

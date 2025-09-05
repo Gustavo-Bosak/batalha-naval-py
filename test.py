@@ -1,3 +1,4 @@
+''' Testes no ajuste de variáveis globais
 import random
 import time
 import os
@@ -379,3 +380,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+'''
