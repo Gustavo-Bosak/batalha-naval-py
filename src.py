@@ -51,27 +51,53 @@ import random
 import time
 import os
 
-# Inicialização das listas
-tabuleiros = []
-jogadas_certas = []
-jogadas_erradas = []
-barcos_restantes_template = {    
-    4: 1,  # 1 barco de 4 posições   
-    3: 2,  # 2 barcos de 3 posições
-    2: 2,  # 2 barcos de 2 posições
-    1: 1   # 1 barco de 1 
-}
-barcos_por_jogador = []
-quantBarcosTotais = [15, 15]
-
-# Função para limpar o terminal (variação para Windows e macOS)
+# -------------------------- UTIL --------------------------
 def limparTerminal():
     if os.name == 'nt':
         os.system('cls')
-    else :
+    else:
         os.system('clear')
 
-def mostrarRegras():
+# -------------------------- ESTADO ------------------------ 
+def criarEstado():
+    """
+    Dicionario para evitar variaveis globais
+    """
+    return {
+        "tabuleiros": [],                
+        "jogadas_certas": [],            
+        "jogadas_erradas": [],           
+        "barcos_por_jogador": [],        
+        "quantBarcosTotais": [15, 15],   
+        "barcos_restantes_template": {
+            4: 1,  # 1 barco de 4
+            3: 2,  # 2 barcos de 3
+            2: 2,  # 2 barcos de 2
+            1: 1   # 1 barco de 1
+        }
+    }
+
+def criarNovosTabuleiros(estado):
+    """
+    Reseta toda a estrutura do jogo e gera 2 tabuleiros vazios com emojis - 🌊
+    """
+    estado["jogadas_certas"].clear()
+    estado["jogadas_erradas"].clear()
+    estado["tabuleiros"].clear()
+    estado["barcos_por_jogador"].clear()
+    estado["quantBarcosTotais"] = [15, 15]
+
+    for _ in range(2):
+        barco_por_jogador = estado["barcos_restantes_template"].copy()
+        tabuleiro = [["🌊" for _ in range(8)] for _ in range(8)]
+        estado["tabuleiros"].append(tabuleiro)
+        estado["barcos_por_jogador"].append(barco_por_jogador)
+
+# ---------------------- TELAS / REGRAS --------------------
+def mostrarRegras(estado):
+    """
+    Função para exibir regras do jogo
+    """
     limparTerminal()
     print('------------------ REGRAS ------------------\n')
 
@@ -102,416 +128,403 @@ def mostrarRegras():
     print('- Ganha quem destruir todos os barcos do oponente primeiro.\n')
 
     input('Aperte ⏎ para voltar ao menu.')
-    menu()
+ 
 
-def criarNovosTabuleiros(tabuleiros, jogadas_certas, jogadas_erradas, barcos_por_jogador):
-    # Redefinição da quantidade inicial de barcos
-    jogadas_certas.clear()
-    jogadas_erradas.clear()
-
-    for _ in range(2):
-        if len(tabuleiros) == 2:
-            tabuleiros.clear()
-            barcos_por_jogador.clear()
-        
-        barco_por_jogador = barcos_restantes_template.copy()
-        tabuleiro = []
-
-        for _ in range(8):
-            novaLinha = []
-            for _ in range(8):
-                novaLinha.append('🌊')
-            tabuleiro.append(novaLinha)
-        tabuleiros.append(tabuleiro)
-        barcos_por_jogador.append(barco_por_jogador)
-
+# ---------------------- FLUXO DE JOGO ---------------------
 def definirNomeJogador(modoDeJogo):
-    if modoDeJogo == 1:
-        return 'Jogador 2'
-    elif modoDeJogo == 2:
-        return 'Computador'
+    """
+    Função para definir jogador 2
+    """
+    return 'Computador' if modoDeJogo == 2 else 'Jogador 2'
 
-# Função para definir o primeiro a jogar, retorna 0 ou 1
 def sortearJogadores(modoDeJogo):
+    """
+    Função sortear jogador e exibir ao usuario.
+    """
     limparTerminal()
-    print(f'Sorteando os jogadores', end='')
-    time.sleep(0.3)
-    print('.', end='')
-    time.sleep(0.3)
-    print('.', end='')
-    time.sleep(0.3)
-    print('.')
-    time.sleep(0.3)
-    print('---------------------------------------------\n')
-    
-    jogador2 = definirNomeJogador(modoDeJogo)
+    print('Sorteando os jogadores', end='')
+    for _ in range(3):
+        time.sleep(0.3)
+        print('.', end='')
+    print('\n---------------------------------------------\n')
 
+    jogador2 = definirNomeJogador(modoDeJogo)
+   
     primeiroAJogar = random.choice(['Jogador 1', jogador2])
     print(f'Quem joga primeiro é o {primeiroAJogar}!')
-    
     input('\nAperte ⏎ Enter para começar.')
 
-    if primeiroAJogar == 'Jogador 1':
-        return 0
-    else:
-        return 1
+    return 0 if primeiroAJogar == 'Jogador 1' else 1
 
-#função para exibir tabuleiro
-def exibirTabuleiro(jogadorAtual, ocultar = True):    
+def exibirTabuleiro(estado, jogadorAtual, ocultar=True):
+    """
+    Função para exibir tabuleiro e ocultar barcos do adversario 
+    """
     limparTerminal()
-
     print(' A   B    C    D    E    F    G    H')
     print('_______________________________________')
-
+    tabuleiro = estado["tabuleiros"][jogadorAtual]
     for i in range(8):
         linha_formatada = ''
         for j in range(8):
-            simbolo = tabuleiros[jogadorAtual][i][j]
-            if simbolo == '🚢' and ocultar == True:
+            simbolo = tabuleiro[i][j]
+            if simbolo == '🚢' and ocultar:
                 linha_formatada += '🌊' + ' | '
             else:
                 linha_formatada += simbolo + ' | '
         print(linha_formatada + f'{i+1}')
-        
     print('_______________________________________\n')
 
-#função para alterar jogadores
 def alternarJogador(jogadorAtual):
+    """
+    Função para alternar jogador
+    """
     return 1 - jogadorAtual
 
-def capturarEntrada(jogadorAtual, modoDeJogo):
+def capturarEntrada(estado, jogadorAtual, modoDeJogo):
+    """
+    Função para capturar entrada. Maquina/Usuario(s)
+    """
     if modoDeJogo == 2 and jogadorAtual == 1:
-        # Passa direto, resposta já capturada da máquina
-        return maquina(jogadas_certas, jogadas_erradas)
-    
+        # máquina decide a jogada
+        return maquina(estado["jogadas_certas"], estado["jogadas_erradas"])
     else:
         entrada = input(f"🎯 Jogador {jogadorAtual + 1}, escolha uma posição (ex: B4): ").strip().upper()
         return entrada
 
 def validarEntrada(entrada):
+    """
+    Função para validar entrada dos jogadores
+    """
     colunas = {'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4, 'F': 5, 'G': 6, 'H': 7}
-    
     if isinstance(entrada, tuple):
         return entrada
-    
     if len(entrada) < 2 or len(entrada) > 3:
         return None
-    
     letra, numero = entrada[0], entrada[1:]
-    
     if letra not in colunas or not numero.isdigit():
         return None
-    
     linha = int(numero) - 1
     coluna = colunas[letra]
-
     if 0 <= linha <= 7 and 0 <= coluna <= 7:
         return (linha, coluna)
-    else:
-        return None
+    return None
 
-def processarJogada(jogadorAtual, coordenadas, modoDeJogo):
+def processarJogada(estado, jogadorAtual, coordenadas, modoDeJogo):
+    """
+    Função para validar e adicionar emojis ao tabuleiro.
+    Retorna se houver Acerto, Erro ou Vitoria 
+    """
     inimigo = 1 - jogadorAtual
     linha, coluna = coordenadas
-    simbolo = tabuleiros[inimigo][linha][coluna]
+    simbolo = estado["tabuleiros"][inimigo][linha][coluna]
 
     if simbolo in ['🔥', '💣']:
         print("⛔ Já jogou aqui.")
-        input("Aperte ⏎ Enter  para continuar...")
+        input("Aperte ⏎ Enter para continuar...")
         return 'repetida'
 
     if simbolo == '🚢':
-        tabuleiros[inimigo][linha][coluna] = '🔥'
-        quantBarcosTotais[inimigo] -= 1
+        estado["tabuleiros"][inimigo][linha][coluna] = '🔥'
+        estado["quantBarcosTotais"][inimigo] -= 1
 
         if modoDeJogo == 2 and jogadorAtual == 1:
             print("🤖 O computador jogou e ACERTOU!")
-            jogadas_certas.append(coordenadas)
-            
+            estado["jogadas_certas"].append(coordenadas)
         else:
             print("🔥 ACERTOU!")
-        input("\nAperte ⏎ Enter  para continuar...")      
-        
-        if quantBarcosTotais[inimigo] > 0:
+        input("\nAperte ⏎ Enter para continuar...")
+
+        if estado["quantBarcosTotais"][inimigo] > 0:
             return 'acerto'
         else:
             return 'vitoria'
-
     else:
-        tabuleiros[inimigo][linha][coluna] = '💣'
-
+        estado["tabuleiros"][inimigo][linha][coluna] = '💣'
         if modoDeJogo == 2 and jogadorAtual == 1:
             print("🤖 O computador jogou e ERROU!")
-            jogadas_erradas.append(coordenadas)
-
+            estado["jogadas_erradas"].append(coordenadas)
         else:
             print("💣 ERROU!")
-        input("\nAperte ⏎ Enter  para continuar...")
+        input("\nAperte ⏎ Enter para continuar...")
         return 'erro'
 
-def turno(jogadorAtual, modoDeJogo):
+def turno(estado, jogadorAtual, modoDeJogo):
+    """
+    Função para verificar erro e alternar turno.
+    Oculta barcos do inimigo
+    """
     while True:
+        # mostra o tabuleiro do inimigo 
         if not (modoDeJogo == 2 and jogadorAtual == 1):
-            exibirTabuleiro(1 - jogadorAtual)
+            exibirTabuleiro(estado, 1 - jogadorAtual, ocultar=True)
         else:
             limparTerminal()
 
-        entrada = capturarEntrada(jogadorAtual, modoDeJogo)
+        entrada = capturarEntrada(estado, jogadorAtual, modoDeJogo)
         coordenadas = validarEntrada(entrada)
-
         if coordenadas is None:
             print("❌ Entrada inválida.")
-            input("\nAperte ⏎ Enter  para continuar...")
+            input("\nAperte ⏎ Enter para continuar...")
             continue
 
-        resultado = processarJogada(jogadorAtual, coordenadas, modoDeJogo)
+        resultado = processarJogada(estado, jogadorAtual, coordenadas, modoDeJogo)
         if resultado == 'repetida':
             continue
-        
         if resultado == 'vitoria':
             return 'vitoria'
-        
         if resultado == 'erro':
             return 'erro'
+        
 
-def alternarTurno(jogadorAtual, modoDeJogo):
+def alternarTurno(estado, jogadorAtual, modoDeJogo):
+    """
+    Função que verifica vitoria senão alterna jogador.
+    """
     while True:
-        status = turno(jogadorAtual, modoDeJogo)
+        status = turno(estado, jogadorAtual, modoDeJogo)
         if status == 'vitoria':
-            exibirVitoria(jogadorAtual, modoDeJogo)
+            exibirVitoria(estado, jogadorAtual, modoDeJogo)
             break
         jogadorAtual = alternarJogador(jogadorAtual)
 
-def exibirVitoria(jogadorAtual, modoDeJogo):
-    jogador2 = definirNomeJogador(modoDeJogo)
-        
-    # Imprime a mensagem de vitória conforme adversário
-    if quantBarcosTotais[1 - jogadorAtual] == 0:
-        print(f'{jogador2} ganhou! 🎉')
-    else:
-        print(f'Jogador 1 ganhou! 🎉')
+def exibirVitoria(estado, jogadorAtual, modoDeJogo):
+    """
+    Função para verificar jogador vencedor e exibir no terminal.
+    """
+    vencedor = "Jogador 1" if jogadorAtual == 0 else ("Computador" if modoDeJogo == 2 else "Jogador 2")
+    print(f'{vencedor} ganhou! 🎉')
 
-def validarPosicao(tabuleiro, coord1, coord2, barcos_restantes):                                          
-    linha1, col1 = coord1                                                                                  
-    linha2, col2 = coord2                                                                                #converte as coordenadas para índices A3 vira (0,2)
+# ---------------------- POSICIONAMENTO ---------------------
+def validarPosicao(tabuleiro, coord1, coord2, barcos_restantes):
+    """
+    Função de validação para poscionamento dos barcos.
+    """
+    linha1, col1 = coord1
+    linha2, col2 = coord2
 
+    # precisa ser em linha reta
     if linha1 != linha2 and col1 != col2:
         return False, "❌ O barco deve estar em linha reta (horizontal ou vertical).", None
-    
-    tamanho = abs(linha2 - linha1 + col2 - col1) + 1                                                      # +1 para incluir a casa inicial abs para garantir valor positivo
 
-    if tamanho not in barcos_restantes or barcos_restantes[tamanho] == 0:                                 
+    # tamanho
+    tamanho = abs(linha2 - linha1 + col2 - col1) + 1
+
+    if tamanho not in barcos_restantes or barcos_restantes[tamanho] == 0:
         return False, f"❌ Você não pode posicionar mais barcos de {tamanho} casas.", None
 
-    # Verifica sobreposição
+    # sobreposição
     if linha1 == linha2:  # horizontal
-        for col in range(min(col1, col2), max(col1, col2)+1):                                            
-            if tabuleiro[linha1][col] != '🌊':                  
+        for col in range(min(col1, col2), max(col1, col2)+1):
+            if tabuleiro[linha1][col] != '🌊':
                 return False, "🚫 Já existe um barco nessa posição.", None
-    else:  # Horizontal
-        for lin in range(min(linha1, linha2), max(linha1, linha2)+1):       
+    else:  # vertical
+        for lin in range(min(linha1, linha2), max(linha1, linha2)+1):
             if tabuleiro[lin][col1] != '🌊':
                 return False, "🚫 Já existe um barco nessa posição.", None
 
     return True, "✅ Posição válida.", tamanho
 
-def posicionarBarcos(jogador, barcos_por_jogador):                                                    # jogador = 0 ou 1
-    while sum(barcos_por_jogador[jogador].values()) > 0:                                              # enquanto a soma dos valores do dicionário for maior que 0, ou seja, enquanto houver barcos para posicionar
-        exibirTabuleiro(jogador, False)                                                               
+def posicionarBarcos(estado, jogador):
+    """
+    Função com um loop verificando se a barcos para receber entrada e posicionar barcos nos tabuleiros do usuario
+    """
+    while sum(estado["barcos_por_jogador"][jogador].values()) > 0:
+        exibirTabuleiro(estado, jogador, ocultar=False)
         print(f'\n Jogador {jogador+1} coloque seus barcos no tabuleiro!')
-        print("📦 Barcos restantes:")                                                         
-        for tamanho, qtd in barcos_por_jogador[jogador].items():                                       # percorre o dicionário de barcos restantes
-            if qtd > 0:              
-                print(f" - {qtd} barco(s) de {tamanho} casas")                               
+        print("📦 Barcos restantes:")
+        for tamanho, qtd in estado["barcos_por_jogador"][jogador].items():
+            if qtd > 0:
+                print(f" - {qtd} barco(s) de {tamanho} casas")
 
-        entrada = input("Digite a posição inicial e final do barco (ex: A1 A4): ").strip().upper()    # captura a entrada do jogador e formata
+        entrada = input("Digite a posição inicial e final do barco (ex: A1 A4): ").strip().upper()
         try:
-            inicio, fim = entrada.split()                                                             
-        except ValueError:                                                                            
-            print("❌ Entrada inválida. Use o formato: A1 A4.")                 
+            inicio, fim = entrada.split()
+        except ValueError:
+            print("❌ Entrada inválida. Use o formato: A1 A4.")
             input('\nAperte ⏎ Enter para continuar.')
-            continue 
+            continue
 
-        coord1 = validarEntrada(inicio)                                        
-        coord2 = validarEntrada(fim)                       
-
-        if not coord1 or not coord2:                                        
+        coord1 = validarEntrada(inicio)
+        coord2 = validarEntrada(fim)
+        if not coord1 or not coord2:
             print("❌ Coordenadas inválidas.")
             input('\nAperte ⏎ Enter para continuar.')
             continue
 
-        valido, msg, tamanho = validarPosicao(tabuleiros[jogador], coord1, coord2, barcos_por_jogador[jogador])     # valida a posição
+        valido, msg, tamanho = validarPosicao(
+            estado["tabuleiros"][jogador], coord1, coord2, estado["barcos_por_jogador"][jogador]
+        )
         if not valido:
             print(msg)
             input('\nAperte ⏎ Enter para continuar.')
             continue
 
-        # ✅ Posiciona o barco
-        linha1, col1 = coord1               
-        linha2, col2 = coord2              
-
-        if linha1 == linha2: 
-            for col in range(min(col1, col2), max(col1, col2)+1):   
-                tabuleiros[jogador][linha1][col] = '🚢'                                                   # posiciona o barco no tabuleiro
+        # posiciona
+        linha1, col1 = coord1
+        linha2, col2 = coord2
+        if linha1 == linha2:
+            for col in range(min(col1, col2), max(col1, col2)+1):
+                estado["tabuleiros"][jogador][linha1][col] = '🚢'
         else:
             for lin in range(min(linha1, linha2), max(linha1, linha2)+1):
-                tabuleiros[jogador][lin][col1] = '🚢'
+                estado["tabuleiros"][jogador][lin][col1] = '🚢'
 
-        barcos_por_jogador[jogador][tamanho] -= 1                                                         # subtrai a quantidade de barcos restantes do tamanho usado
+        estado["barcos_por_jogador"][jogador][tamanho] -= 1
 
     print(f"\n✅ Jogador {jogador + 1}, todos os barcos foram posicionados!\n")
     input("Aperte ⏎ para continuar.")
     limparTerminal()
 
-def posicionarBarcosMaquina(jogador, barcos_por_jogador):
-    while sum(barcos_por_jogador[jogador].values()) > 0:
-        tamanho_aleatorio = random.choice([t for t, q in barcos_por_jogador[jogador].items() if q > 0])                # escolhe um tamanho de barco aleatório que ainda tenha quantidade disponível
-
+def posicionarBarcosMaquina(estado, jogador):
+    """
+    Função para maquina (Não exibe no terminal) com um loop verificando se a barcos para receber entrada e posicionar barcos nos tabuleiros do usuario
+    """
+    while sum(estado["barcos_por_jogador"][jogador].values()) > 0:
+        tamanho_aleatorio = random.choice(
+            [t for t, q in estado["barcos_por_jogador"][jogador].items() if q > 0]
+        )
         orientacao = random.choice(['H', 'V'])
         linha, coluna = tiroAleatorio()
-        
+
         if orientacao == 'H':
             if coluna + tamanho_aleatorio > 8:
                 continue
             coord1 = (linha, coluna)
-            coord2 = (linha, coluna + tamanho_aleatorio - 1)                                                          # calcula a segunda coordenada com base no tamanho do barco faznedo -1 para incluir a casa inicial 
+            coord2 = (linha, coluna + tamanho_aleatorio - 1)
         else:
             if linha + tamanho_aleatorio > 8:
                 continue
             coord1 = (linha, coluna)
-            coord2 = (linha + tamanho_aleatorio - 1, coluna)                                               
-        valido, msg, tamanho = validarPosicao(tabuleiros[jogador], coord1, coord2, barcos_por_jogador[jogador])
-        
+            coord2 = (linha + tamanho_aleatorio - 1, coluna)
+
+        valido, _, tamanho = validarPosicao(
+            estado["tabuleiros"][jogador], coord1, coord2, estado["barcos_por_jogador"][jogador]
+        )
         if not valido:
             continue
 
-        # Posiciona
+        # posiciona
         linha1, col1 = coord1
         linha2, col2 = coord2
-
         if linha1 == linha2:
             for col in range(col1, col2 + 1):
-                tabuleiros[jogador][linha1][col] = '🚢'
+                estado["tabuleiros"][jogador][linha1][col] = '🚢'
         else:
             for lin in range(linha1, linha2 + 1):
-                tabuleiros[jogador][lin][col1] = '🚢'
+                estado["tabuleiros"][jogador][lin][col1] = '🚢'
 
-        barcos_por_jogador[jogador][tamanho] -= 1
+        estado["barcos_por_jogador"][jogador][tamanho] -= 1
 
-def tiroAleatorio():  
-    """Gera coordenadas de um tiro aleatório no tabuleiro."""
-    linha = random.randint(0, 7)
-    coluna = random.randint(0, 7)
-    return (linha, coluna)
+# ---------------------- IA / MÁQUINA ----------------------
+def tiroAleatorio():
+    """
+    Função gerando cordenas aleatorias para maquina
+    """
+    return (random.randint(0, 7), random.randint(0, 7))
 
 def maquina(jogadas_certas, jogadas_erradas):
     """
-    Decide onde a máquina deve atirar com base nas jogadas anteriores.
-    
-    Returns:
-        tuple: As coordenadas (linha, coluna) do tiro.
+    Função para deixar maquina "Inteligente", cria lista com jogadas proximas se houver acerto.
+    Retorna um tiro aleatorio.
     """
     tiro = None
-    # Lógica de 'caçar' o barco: se houver acertos anteriores não afundados
     if jogadas_certas:
-        # Pega a última jogada certa para tentar atirar ao redor
-        ultima_jogada = jogadas_certas[-1]
-        opcoes_de_tiro = [
-            (ultima_jogada[0] - 1, ultima_jogada[1]), # Acima
-            (ultima_jogada[0] + 1, ultima_jogada[1]), # Abaixo
-            (ultima_jogada[0], ultima_jogada[1] - 1), # Esquerda
-            (ultima_jogada[0], ultima_jogada[1] + 1)  # Direita
+        ultima = jogadas_certas[-1]
+        opcoes = [
+            (ultima[0] - 1, ultima[1]), #esquerda
+            (ultima[0] + 1, ultima[1]), #direita
+            (ultima[0], ultima[1] - 1), #cima
+            (ultima[0], ultima[1] + 1)  #baixo
         ]
-        
-        # Filtra as opções para garantir que estão dentro do tabuleiro e ainda não foram tentadas
         tiros_validos = [
-            op for op in opcoes_de_tiro 
+            op for op in opcoes
             if 0 <= op[0] <= 7 and 0 <= op[1] <= 7 and op not in jogadas_certas and op not in jogadas_erradas
         ]
-
         if tiros_validos:
             tiro = random.choice(tiros_validos)
-    
-    # Se não houver acertos ou se a lógica de 'caça' não encontrar um tiro válido
+
     if not tiro:
         tiro = tiroAleatorio()
         while tiro in jogadas_certas or tiro in jogadas_erradas:
             tiro = tiroAleatorio()
-                
+
     return tiro
 
-def jogar(modoDeJogo):
+# ---------------------- ORQUESTRAÇÃO ----------------------
+def jogar(estado, modoDeJogo):
+    """
+    Função para roda o jogo, sorteia jogadores, posiciona barcos e alterna turno. 
+    """
     jogadorAtual = sortearJogadores(modoDeJogo)
 
-    if modoDeJogo == 2:                                                                      # modoDeJogo = 1 (vs amigo) ou 2 (vs máquina)
+    if modoDeJogo == 2:
         for _ in range(2):
-            if jogadorAtual == 1:                                                             # se for a vez da máquina, posiciona os barcos automaticamente
-                posicionarBarcosMaquina(jogadorAtual, barcos_por_jogador)
+            if jogadorAtual == 1:
+                posicionarBarcosMaquina(estado, jogadorAtual)
             else:
-                posicionarBarcos(jogadorAtual, barcos_por_jogador)
-
-            jogadorAtual = alternarJogador(jogadorAtual)                                      
-    
+                posicionarBarcos(estado, jogadorAtual)
+            jogadorAtual = alternarJogador(jogadorAtual)
     else:
-        for _ in range(2):                                                                 #se nao for modo de jogo 2, roda o modo 1
-            posicionarBarcos(jogadorAtual, barcos_por_jogador)
+        for _ in range(2):
+            posicionarBarcos(estado, jogadorAtual)
             jogadorAtual = alternarJogador(jogadorAtual)
 
-    alternarTurno(jogadorAtual, modoDeJogo)
+    alternarTurno(estado, jogadorAtual, modoDeJogo)
 
-def menu():
-    limparTerminal()
-    print('---------------------------------------------')
-    print('----------------BATALHA NAVAL----------------')
-    print('---------------------------------------------\n')
-    print('Escolha uma das opções: \n1. Jogar contra amigos\n2. Jogar contra a máquina\n3. Regras\n4. Sair do jogo')
-    
-    # Validação de entrada para menu
+def menu(estado):
+    """
+    Exibe menu e recebe entrada com validação.
+    """
     while True:
-        try:
-            resposta = int(input('\nR: '))
+        limparTerminal()
+        print('---------------------------------------------')
+        print('----------------BATALHA NAVAL----------------')
+        print('---------------------------------------------\n')
+        print('Escolha uma das opções: ')
+        print('1. Jogar contra amigos')
+        print('2. Jogar contra a máquina')
+        print('3. Regras')
+        print('4. Sair do jogo')
 
-            if resposta >= 1 and resposta <= 4:
-                break
-            else:
-                print('Digite apenas números entre 1 e 4.')
-                
-        except ValueError:
-            print('Digite apenas números inteiros')
-    
-    match resposta:
-        case 1:
-            jogar(resposta)
+        # entrada menu
+        resposta = None
+        while True:
+            try:
+                resposta = int(input('\nR: '))
+                if resposta in (1, 2, 3, 4):
+                    break
+                else:
+                    print('Digite apenas números entre 1 e 4.')
+            except ValueError:
+                print('Digite apenas números inteiros')
 
-        case 2:
-            jogar(resposta)
-
-        case 3:
-            mostrarRegras()
-        case _:
-            return
+        if resposta in (1, 2):
+            jogar(estado, resposta)
+            return  # volta para main após término da partida
+        elif resposta == 3:
+            mostrarRegras(estado)
+            # loop continua e redesenha o menu
+        else:
+            return  # sair
 
 def main():
     while True:
-        # Resetar tabuleiro
-        criarNovosTabuleiros(tabuleiros, jogadas_certas, jogadas_erradas, barcos_por_jogador)                         #todas as funções tem clear entao reseta automaticamente
+        estado = criarEstado()
+        criarNovosTabuleiros(estado)
 
-        menu()
+        menu(estado)
+
         print('\n\n---------------------------------------------')
         print('-----------------FIM DE JOGO-----------------')
         print('---------------------------------------------\n')
-        print('Quer jogar novamente? Responda apenas "sim" ou "não"')
-        entrada = input('R: ')
-        confirmacao = entrada.lower().strip()
-
-        if confirmacao == 'sim':
+        entrada = input('Quer jogar novamente? ("sim" / "não"): ').strip().lower()
+        if entrada in ("sim", "s"):
             continue
-
-        elif confirmacao == 'não' or confirmacao == 'nao':
+        elif entrada in ("não", "nao", "n"):
             break
-
         else:
-            print('\nResposta não esperada.')
-            entrada = input('R: ')
+            print('Resposta não reconhecida, encerrando...')
+            break
 
 main()
